@@ -1,0 +1,26 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { TransactionService } from './transaction.service';
+
+@Component({
+  selector: 'my-app',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent implements OnInit {
+
+  transactions: Transaction[] = [];
+  totalSpent: number = 0;
+  budgetRemaining: number = 0;
+
+  constructor(private transactionService: TransactionService, private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.transactionService.getTransactions().subscribe(transactions => {
+      this.transactions = transactions;
+      this.totalSpent = transactions.reduce((a, b) => a + b.amount, 0);
+      this.budgetRemaining = this.route.snapshot.queryParams['budget'];
+    });
+  }
+
+}
