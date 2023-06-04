@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { TransactionService } from './transaction.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'my-app',
@@ -9,18 +8,60 @@ import { TransactionService } from './transaction.service';
 })
 export class AppComponent implements OnInit {
 
-  transactions: Transaction[] = [];
-  totalSpent: number = 0;
-  budgetRemaining: number = 0;
+  transactions: Array<Transaction>;
+  totalAmount: number;
+  budgetRemaining: number;
 
-  constructor(private transactionService: TransactionService, private route: ActivatedRoute) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.transactionService.getTransactions().subscribe(transactions => {
+    this.getTransactions();
+  }
+
+  getTransactions() {
+    this.http.get('api/transactions').map((res: Response) => res.json()).subscribe((transactions: Array<Transaction>) => {
       this.transactions = transactions;
-      this.totalSpent = transactions.reduce((a, b) => a + b.amount, 0);
-      this.budgetRemaining = this.route.snapshot.queryParams['budget'];
+      this.totalAmount = transactions.reduce((total, transaction) => total + transaction.amount, 0);
+      this.budgetRemaining = this.totalAmount;
     });
   }
 
+  createTransaction(amount: number, category: string) {
+    const transaction = new Transaction();
+    transaction.amount = amount;
+    transaction.category = category;
+    transaction.user = this.currentUser;
+    transaction.save();
+
+    this.transactions.push(transaction);
+    this.totalAmount += amount;
+    this.budgetRemaining -= amount;
+  }
+
+  updateTransaction(transaction: Transaction, amount: number, category: string) {
+    transaction.amount = amount;
+    transaction.category = category;
+    transaction.save();
+
+    this.transactions = this.transactions.map((t) => {
+      if (t === transaction) {
+        t.amount = amount;
+        t.category = category;
+      }
+
+      return t;
+    });
+
+    this.totalAmount = this.transactions.reduce((total, transaction) => total + transaction.amount, 0);
+    this.budgetRemaining = this.totalAmount;
+  }
+
+  deleteTransaction(transaction: Transaction) {
+    transaction.delete();
+
+    this.transactions = this.transactions.filter((t) => t !== transaction);
+
+    this.totalAmount -= transaction.amount;
+    this.budgetRemaining += transaction.amount;
+  }
 }
