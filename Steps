@@ -1,0 +1,13 @@
+
+To run the code, you will need to install Django and Angular. Once you have installed those frameworks, you can follow these steps:
+
+- Create a new Django project.
+- Install the Django REST framework.
+- Create the models for users, transactions, and categories.
+- Create the views for listing, creating, updating, and deleting transactions.
+- Use Django's built-in authentication system to authenticate users.
+- Use Django's built-in ORM to store the data in an SQLite database.
+- Create a new Angular project.
+- Import the Django REST API into the Angular project.
+- Create the components for displaying the list of transactions, filtering transactions, displaying the total amount spent and the budget remaining, creating, updating, and deleting transactions, and showing who owes you or who you owe.
+- Run the Angular app.
